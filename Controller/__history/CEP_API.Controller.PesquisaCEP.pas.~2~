@@ -1,0 +1,36 @@
+unit CEP_API.Controller.PesquisaCEP;
+
+interface
+
+uses
+  Horse,
+  System.JSON,
+  Sysutils,
+  System.Classes,
+  IdCoderMIME,
+  Soap.EncdDecd;
+
+procedure Registry(App : THorse);
+procedure ListarScripts(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+
+implementation
+
+uses CEP_API.Model.Resposta;
+
+procedure Registry(App : THorse);
+begin
+  App.Get('/listarscripts/:data/:versao', ListarScripts); //Listar scripts a partir desta data ou versao
+end;
+
+procedure ListarScripts(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+var
+  resposta : TResposta;
+  cmd : TStringList;
+begin
+  resposta := TResposta.Create;
+
+  cmd := TStringList.Create;
+  res.Send(cmd.Text);
+end;
+
+end.

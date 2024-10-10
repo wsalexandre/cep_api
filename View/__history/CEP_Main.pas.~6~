@@ -1,0 +1,51 @@
+unit CEP_Main;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Controls.Presentation, FMX.Layouts, FMX.Effects, FMX.Filter.Effects,
+  FMX.Edit, FMX.Memo.Types, FMX.ScrollBox, FMX.Memo,
+  CEP_API.Model.Resposta;
+
+type
+  THeaderFooterForm = class(TForm)
+    Header: TToolBar;
+    Footer: TToolBar;
+    HeaderLabel: TLabel;
+    RadialBlurEffect1: TRadialBlurEffect;
+    btnSair: TCornerButton;
+    Panel1: TPanel;
+    Label1: TLabel;
+    Edit1: TEdit;
+    btnPesquisar: TCornerButton;
+    MemoResultado: TMemo;
+  private
+    { Private declarations }
+    procedure LimparPesquisa;
+    procedure NovaPesquisa(const CEPNumero : String);
+  public
+    { Public declarations }
+  end;
+
+var
+  HeaderFooterForm: THeaderFooterForm;
+
+implementation
+
+{$R *.fmx}
+
+{ THeaderFooterForm }
+
+procedure THeaderFooterForm.LimparPesquisa;
+begin
+  Memo
+end;
+
+procedure THeaderFooterForm.NovaPesquisa(const CEPNumero: String);
+begin
+
+end;
+
+end.

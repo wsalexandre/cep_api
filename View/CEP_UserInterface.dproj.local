@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2024/10/09 21:10:25.334,C:\iqsistemas\CEP_API\View\CEP_UserInterface.dproj=C:\iqsistemas\CEP_API\View\HeaderFooterApplication.dproj</Transaction>
+    <Transaction>2024/10/09 21:10:36.496,C:\iqsistemas\CEP_API\View\CEP_Main.fmx=C:\iqsistemas\CEP_API\View\HeaderFooterTemplate.fmx</Transaction>
+    <Transaction>2024/10/09 21:10:36.496,C:\iqsistemas\CEP_API\View\CEP_Main.pas=C:\iqsistemas\CEP_API\View\HeaderFooterTemplate.pas</Transaction>
+    <Transaction>2024/10/09 21:20:45.863,=C:\iqsistemas\CEP_API\Model\CEP_API.Model.Resposta.pas</Transaction>
+    <Transaction>2024/10/09 21:25:03.748,=C:\iqsistemas\CEP_API\Helpers\CEP_API.Helpers.Auxiliar.pas</Transaction>
+  </Transactions>
+</BorlandProject>

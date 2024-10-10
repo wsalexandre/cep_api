@@ -1,0 +1,15 @@
+program CEP_UserInterface;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  CEP_Main in 'CEP_Main.pas' {HeaderFooterForm},
+  CEP_API.Model.Resposta in '..\Model\CEP_API.Model.Resposta.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(THeaderFooterForm, HeaderFooterForm);
+  Application.Run;
+end.

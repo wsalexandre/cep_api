@@ -1,0 +1,243 @@
+unit CEP_API.Controller.PesquisaCEP;
+
+interface
+
+uses
+  Horse,
+  System.JSON,
+  FireDAC.Comp.Client,
+  Sysutils,
+  System.Classes,
+  IdCoderMIME,
+  Soap.EncdDecd,
+  SICE_API.Model.AtualizacaoScripts;
+
+procedure Registry(App : THorse);
+procedure ListarScripts(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+procedure EnviarArquivoPL(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+procedure BaixarArquivoPL(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+procedure BaixarArquivoPLTeste(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+procedure VerificarScriptsApp(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+procedure ExecutarScriptsApp(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+procedure GerarArquivoPLSQL(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+
+implementation
+
+uses SICE_API.Model.Conexao, SICE_API.Model.Resposta;
+
+procedure Registry(App : THorse);
+begin
+  App.Get('/listarscripts/:data/:versao', ListarScripts); //Listar scripts a partir desta data ou versao
+  App.Post('/enviarplsql', EnviarArquivoPL); //Enviar arquivo com PLSQL
+  App.Get('/baixarplsql', BaixarArquivoPL); //Baixar arquivo com PLSQL
+  App.Get('/baixarplsqltestes', BaixarArquivoPLTeste); //Baixar arquivo com PLSQL de testes
+  App.Post('/verificarscriptsapp', VerificarScriptsApp); //Verifica se existem scripts a serem executados
+  App.Post('/executarscriptsapp', ExecutarScriptsApp); //Verifica se existem scripts a serem executados
+  App.Post('/gerararquivoplsql', GerarArquivoPLSQL); //Gera o arquivo de pv para ser armazenado no servidor e executado pelos clientes
+end;
+
+procedure ListarScripts(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+var
+  vConexao : TConexao;
+  qry : TFDQuery;
+  cmd : TStringlist;
+  resposta : TResposta;
+begin
+  vConexao := TConexao.Create('iqsistemas');
+  qry := vConexao.CriarQuery;
+
+  resposta := TResposta.Create;
+
+  cmd := TStringList.Create;
+
+  if Req.Params.Items['data']<>'0' then
+  begin
+    //por data
+    qry.Close;
+    qry.SQL.Add('SELECT DATA, versaodb, publicado, comando FROM scriptsproducao WHERE DATA>'+QuotedStr(Req.Params.Items['data'])+' AND publicado="S";');
+    qry.Open;
+  end
+  else
+  begin
+    //por versao
+    qry.Close;
+    qry.SQL.Add('SELECT DATA, versaodb, publicado, comando FROM scriptsproducao WHERE versaodb>'+QuotedStr(Req.Params.Items['versao'])+' AND publicado="S";');
+    qry.Open;
+  end;
+
+
+  cmd.Add('<?xml version="1.0" encoding="UTF-8"?>');
+  cmd.Add('<commandos>');
+
+
+  while not qry.Eof do
+  begin
+    cmd.Add('  <commando>' +
+
+    '<![CDATA[' + trim(qry.fieldbyname('comando').AsString) + ']]>' +
+
+    '</commando>');
+
+    cmd.Add('  <versao>' + qry.fieldbyname('versaodb').AsString + '</versao>');
+
+
+    qry.Next;
+  end;
+
+  cmd.Add('</commandos>');
+
+  res.Send(cmd.Text);
+
+end;
+
+procedure VerificarScriptsApp(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+  var
+    Resposta : TResposta;
+    Requisicao : TJSONObject;
+    Scripts : String;
+begin
+
+  Resposta := TResposta.Create;
+  Requisicao := Req.Body<TJSONObject>.Clone as TJSONObject;
+
+  Resposta := SICE_API.Model.AtualizacaoScripts.VerificarScripts(Requisicao.GetValue('codigocliente').Value);
+
+  if Resposta.erro = false then
+    begin
+      Resposta.erro := false;
+      Resposta.mensagem := AnsiToUtf8('Existem scripts a serem executados, deseja executar agora?');
+    end
+    else
+    begin
+      Resposta.erro := true;
+      Resposta.mensagem := AnsiToUtf8('N o existem scripts a serem executados');
+    end;
+
+  Res.Send(Resposta.GetRetorno);
+
+end;
+
+procedure ExecutarScriptsApp(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+  var
+    Resposta : TResposta;
+    Requisicao : TJSONObject;
+    ScriptsExecutar : String;
+begin
+
+  Resposta := TResposta.Create;
+  Requisicao := Req.Body<TJSONObject>.Clone as TJSONObject;
+
+  Resposta := SICE_API.Model.AtualizacaoScripts.VerificarScripts(Requisicao.GetValue('codigocliente').Value);
+
+  if Resposta.erro = false then
+    begin
+        Resposta := SICE_API.Model.AtualizacaoScripts.ExecutarScript(Requisicao.GetValue('codigocliente').Value, Resposta.content);
+    end;
+
+  Res.Send(Resposta.GetRetorno);
+
+end;
+
+procedure GerarArquivoPLSQL(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+  var
+    Resposta : TResposta;
+    Requisicao : TJSONObject;
+    ScriptsExecutar : String;
+begin
+
+  Resposta := TResposta.Create;
+  Requisicao := Req.Body<TJSONObject>.Clone as TJSONObject;
+
+  Resposta := SICE_API.Model.AtualizacaoScripts.GerarArquivoPLSQL(Requisicao.GetValue('codigocliente').Value, Requisicao.GetValue('versaoteste').Value);
+
+
+  Res.Send(Resposta.GetRetorno);
+
+end;
+
+
+procedure EnviarArquivoPL(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+var
+  NomeArquivo, Requisicao : String;
+  Input : TStringStream;
+  Output: TFileStream;
+  EntradaJSON : TJSONObject;
+begin
+
+ EntradaJSON := Req.Body<TJSONObject>.Clone as TJSONObject;
+
+  Requisicao := EntradaJSON.GetValue('content').Value;
+
+  NomeArquivo := 'C:\xampp\htdocs\SICE_API\Atualizacao\sp.txt';
+
+  Input :=TStringStream.Create(Requisicao);
+  try
+    Output := TFileStream.Create(NomeArquivo, fmCreate);
+    try
+      DecodeStream(Input, Output);
+    finally
+      Output.Free;
+    end;
+  finally
+    Input.Free;
+  end;
+
+  Res.Send('Arquivo salvo em: ' + NomeArquivo);
+
+end;
+
+procedure BaixarArquivoPL(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+var
+  nomeArquivo, Text, saida64 : String;
+  lStream: TFileStream;
+  base64 : TIdEncoderMIME;
+  resposta : TResposta;
+begin
+    nomeArquivo := 'C:\xampp\htdocs\SICE_API\Atualizacao\sp.txt';
+    resposta := TResposta.Create;
+
+   if fileexists(nomeArquivo) then
+   begin
+     base64 := TIdEncoderMIME.Create(nil);
+     lStream := TFileStream.Create(nomeArquivo, fmOpenRead);
+     saida64 := TIdEncoderMIME.encodeStream(LStream);
+     Res.Send(saida64).Status(201);
+     LStream.Free;
+   end
+   else
+   begin
+     resposta.erro := true;
+     resposta.codigo := 0;
+     resposta.mensagem := AnsiToUtf8('Arquivo n o encontrado!');
+   end;
+
+end;
+
+procedure BaixarArquivoPLTeste(Req : THorseRequest; Res : THorseResponse; Next : TProc);
+var
+  nomeArquivo, Text, saida64 : String;
+  lStream: TFileStream;
+  base64 : TIdEncoderMIME;
+  resposta : TResposta;
+begin
+    nomeArquivo := 'C:\xampp\htdocs\SICE_API\Atualizacao\spTestes.txt';
+    resposta := TResposta.Create;
+
+   if fileexists(nomeArquivo) then
+   begin
+     base64 := TIdEncoderMIME.Create(nil);
+     lStream := TFileStream.Create(nomeArquivo, fmOpenRead);
+     saida64 := TIdEncoderMIME.encodeStream(LStream);
+     Res.Send(saida64).Status(201);
+     LStream.Free;
+   end
+   else
+   begin
+     resposta.erro := true;
+     resposta.codigo := 0;
+     resposta.mensagem := AnsiToUtf8('Arquivo n o encontrado!');
+   end;
+
+end;
+
+end.

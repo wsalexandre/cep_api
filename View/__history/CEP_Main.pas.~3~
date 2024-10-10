@@ -1,0 +1,35 @@
+unit CEP_Main;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Controls.Presentation, FMX.Layouts, FMX.Effects, FMX.Filter.Effects,
+  FMX.Edit;
+
+type
+  THeaderFooterForm = class(TForm)
+    Header: TToolBar;
+    Footer: TToolBar;
+    HeaderLabel: TLabel;
+    RadialBlurEffect1: TRadialBlurEffect;
+    CornerButton1: TCornerButton;
+    Panel1: TPanel;
+    Label1: TLabel;
+    Edit1: TEdit;
+    CornerButton2: TCornerButton;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  HeaderFooterForm: THeaderFooterForm;
+
+implementation
+
+{$R *.fmx}
+
+end.

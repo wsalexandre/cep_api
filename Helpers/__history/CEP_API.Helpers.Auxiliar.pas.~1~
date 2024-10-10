@@ -1,0 +1,217 @@
+unit SICE_API.Helpers.Auxiliar;
+
+interface
+
+uses SysUtils, idHashMessageDigest, System.Classes, IdHTTP;
+
+{ Retorna a string ao lado esquerdo do separador }
+function tbGetShortStr(const S: string; const Sep: Char): string;
+{ Retorna string ao lado direito do separador }
+function tbGetLongStr(const S: string; const Sep: Char): string;
+{ Semelhante a PadC do clipper }
+function tbPadC(const S: string; const Len: integer; const Ch: Char): string;
+{ Semelhante a PadL do clipper }
+function tbPadL(const S: string; const Len: integer; const Ch: Char): string;
+{ Semelhante a PadR do clipper }
+function tbPadR(const S: string; const Len: integer; const Ch: Char): string;
+{ Replica um caractere n vezes formando uma string }
+function tbReplChar(const Ch: Char; const Len: integer): string;
+{ Replica uma string até atingir o tamanho especificado }
+function tbReplStr(const S: string; const Len: integer): string;
+{ Retorna uma string de N espaços }
+function tbSpace(const Len: integer): string;
+{ Forma um número inteiro com zeros à esquerda }
+function tbStrZero(const Value, Len: integer): string;
+{ Converte string em pchar }
+function StrToPChar(const Str: string): PChar;
+{ Calcula a Chave para as Requisições}
+function CalcularChave(Entrada:String) : String;
+{ Executa Metodo HTTP para consumir APIs }
+Function ExecutarMetodoHTTP(URL, ContentString, Method : String) : String;
+
+implementation
+
+Function ExecutarMetodoHTTP(URL, ContentString, Method : String) : String;
+var
+  JsonToSend: TStringStream;
+  IdHTTP1 : TIdHTTP;
+  Response : String;
+begin
+
+  IdHTTP1 := TIdHTTP.create(nil);
+
+  JsonToSend := TStringStream.Create(ContentString, TEncoding.UTF8);
+  try
+    IdHTTP1.Request.ContentType := 'application/json';
+    IdHTTP1.Request.Accept := '*/*';
+
+
+    try
+      if Method='POST' then Response := IdHTTP1.Post(URL, JsonToSend);
+      if Method='GET' then Response := IdHTTP1.Get(URL);
+    except
+      on E: Exception do
+      begin
+        exit;
+      end;
+    end;
+  finally
+    JsonToSend.Free;
+  end;
+
+  result :=  Response;
+
+
+end;
+
+function CalcularChave(Entrada:String) : String;
+Const ChavePrivada : WideString ='nykdqtVGJre7WCQyGswhjsnrdIbaiCDv0Oxe7gIFyNAifgELw0TFh4VkAWiImK2amnfhtNKPqaXugq5BeM6lEPt4BCBNatMmGRtXu4DJ4o39CWyHzsQ38aWxCn9AELM8';
+Var
+  Md5 : TIdHashMessageDigest5;
+  ChaveCalculada : String;
+begin
+       Md5 := TIdHashMessageDigest5.Create;
+       ChaveCalculada := LowerCase(md5.HashStringAsHex(ChavePrivada+Entrada));
+       result := ChaveCalculada
+
+end;
+
+function StrToPChar(const Str: string): PChar;
+{Converte String em Pchar}
+type
+  TRingIndex = 0..7;
+var
+  Ring: array[TRingIndex] of PChar;
+  RingIndex: TRingIndex;
+  Ptr: PChar;
+begin
+  Ptr := @Str[Length(Str)];
+  Inc(Ptr);
+  if Ptr^ = #0 then
+     begin
+     Result := @Str[1];
+     end
+  else
+     begin
+     Result := StrAlloc(Length(Str)+1);
+     RingIndex := (RingIndex + 1) mod (High(TRingIndex) + 1);
+     StrPCopy(Result,Str);
+     StrDispose(Ring[RingIndex]);
+     Ring[RingIndex]:= Result;
+     end;
+end;
+
+function tbGetShortStr(const S: string; const Sep: Char): string;
+var
+I: Integer;
+begin
+  I := AnsiPos(Sep, S);
+  if I = 0 then
+  Result := S
+  else
+  Result := Copy(S, 1, I - 1);
+end;
+
+function tbGetLongStr(const S: string; const Sep: Char): string;
+var
+I: Integer;
+begin
+  I := AnsiPos(Sep, S);
+  if I = 0 then
+  Result := ''
+  else
+  Result := Copy(S, I + 1, High(integer));
+end;
+
+function tbPadC(const S: string; const Len: integer; const Ch: Char): string;
+var
+I, J: integer;
+Pad: string;
+Impar: boolean;
+begin
+  I := Length(S);
+  if I < Len then begin
+    J := Len - I;
+    Impar := J mod 2 = 1;
+    J := J div 2;
+    Pad := tbReplChar(Ch, J);
+    Result := Pad + S + Pad;
+    if Impar then
+    Result := Result + Ch;
+  end else if I > Len then begin
+    J := I - Len;
+    Impar := J mod 2 = 1;
+    J := J div 2;
+    Result := S;
+    Delete(Result, I-J+1, J);
+    Delete(Result, 1, J);
+    if Impar then begin
+      Dec(I, J * 2);
+      Delete(Result, I, 1);
+    end;
+  end else
+  Result := S;
+end;
+
+function tbPadL(const S: string; const Len: integer; const Ch: Char): string;
+var
+LenS: integer;
+begin
+  LenS := Length(S);
+  if LenS < Len then
+  Result := tbReplChar(Ch, Len - LenS) + S
+  else if LenS > Len then
+  Result := Copy(S, LenS-Len+1, Len)
+  else
+  Result := S;
+end;
+
+function tbPadR(const S: string; const Len: integer; const Ch: Char): string;
+var
+LenS: integer;
+begin
+  LenS := Length(S);
+  if LenS < Len then
+  Result := S + tbReplChar(Ch, Len - LenS)
+  else if LenS > Len then
+  Result := Copy(S, 1, Len)
+  else
+  Result := S;
+end;
+
+function tbReplChar(const Ch: Char; const Len: integer): string;
+var
+I: integer;
+begin
+  SetLength(Result, Len);
+  for I := 1 to Len do
+  Result[I] := Ch;
+end;
+
+function tbReplStr(const S: string; const Len: integer): string;
+begin
+  Result := '';
+  while Length(Result) < Len do
+  Result := Result + S;
+  Result := Copy(Result, 1, Len);
+end;
+
+function tbSpace(const Len: integer): string;
+begin
+  Result := tbReplChar(#32, Len);
+end;
+
+function tbStrZero(const Value, Len: integer): string;
+var
+I: integer;
+begin
+  Result := IntToStr(Value);
+  I := Length(Result);
+  if I < Len then
+  Result := tbReplChar('0', Len-I) + Result
+  else if I > Len then
+  Result := tbReplChar('*', Len);
+end;
+
+end.
+

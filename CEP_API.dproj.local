@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/10/09 19:25:41.000.758,C:\Users\ACER\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\iqsistemas\CEP_API\CEP_API.dproj</Transaction>
+    <Transaction>2024/10/09 19:43:44.000.267,=C:\iqsistemas\CEP_API\Controller\CEP_API.Controller.PesquisaCEP.pas</Transaction>
+    <Transaction>2024/10/09 19:43:54.000.056,=C:\iqsistemas\CEP_API\Helpers\CEP_API.Helpers.Auxiliar.pas</Transaction>
+    <Transaction>2024/10/09 19:44:10.000.086,=C:\iqsistemas\CEP_API\Model\CEP_API.Model.Resposta.pas</Transaction>
+  </Transactions>
+</BorlandProject>

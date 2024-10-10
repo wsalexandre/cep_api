@@ -1,0 +1,17 @@
+
+Resposta Questão 1:
+Entendo que arquitetura MVC é um padrão de design comumente usado para desenvolvimento de interface de usuário, que divide o código em três componentes principais: 
+Modelo: o Modelo é responsável pela lógica de negócios e pela manutenção de dados de aplicativos. 
+Visão: a View é a parte de sua aplicação, que é usada para exibir saída ao usuário do aplicativo. 
+Controlador: o Controlador é a peça intermediária de sua aplicação. Ele interage com a view e o modelo. 
+No projeto que criei tentei seguir a arquitetura, nesse caso a interface do usuário vai estar dento da pasta view.
+
+
+Resposta Questão 2:
+
+No exemplo desafio, utilizei o conceito de Strategy, onde encapsulei a requisição http para que a mesma tornasse intercambiável. 
+Usei este conceito na função: 
+
+function ExecutarMetodoHTTP(URL, ContentString, Method: String; var Status: Integer): String;
+ 
+pois eu consigo alternar entre os métodos get ou post em tempo de execução, embora por falta de tempo uma abordagem usando interfaces seria mais completa

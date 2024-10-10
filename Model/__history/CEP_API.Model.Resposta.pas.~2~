@@ -1,0 +1,105 @@
+unit CEP_API.Model.Resposta;
+
+interface
+
+uses  System.SysUtils,
+      System.Classes,
+      System.JSON;
+
+type
+  TResposta = class
+  public
+    erro : Boolean;
+    codigo  : Integer;  // código interno para ser usado como codigo de erro
+    mensagem : String; // devolver a mensagem da sefaz, ou outra para o frontend
+    chave : String; //chave de acesso
+    dataHora : String;
+    doc : String;
+    Stat : String;
+    motivo : String;
+    protocolo, protocoloCancelamento : String; //protocolos
+    notaFiscalNumero, notaFiscalSerie, codigofilial, modelo, documentovenda : String;
+    digVal : String;
+    dhRecbto : Double;
+    verAplic :String;
+    nSeqEvento, tpEvento, CNPJDest, orgao : String;
+    cOrgao : String;
+    tpAmb : String;
+    XML : TStringStream;
+    arquivoCupom, arquivoCancelamento, OUT_NTFNumero, OUT_NTFSerie, OUT_Modelo : String;
+    contaCorrente, idArquivo, content : String;
+    JSONArrayToSend : TJSONArray;
+    apiversion : String;
+
+    constructor Create;
+    destructor Destroy; override;
+    function GetRetorno : String;
+  end;
+
+implementation
+
+{ TResposta }
+
+constructor TResposta.Create;
+begin
+
+    erro := false;
+    codigo := 1;
+    mensagem := '';
+    chave := '';
+    XML := TStringStream.Create;
+    arquivoCupom := '';
+
+    OUT_NTFNumero := '';
+    OUT_NTFSerie := '';
+    OUT_Modelo := '';
+
+    contaCorrente := '';
+    idArquivo := '';
+    content := '';
+    JSONArrayToSend := TJSONArray.Create;
+
+    apiversion := '1.0.01';
+end;
+
+destructor TResposta.Destroy;
+begin
+  FreeAndNil(XML);
+  inherited;
+end;
+
+function TResposta.GetRetorno: String;
+var
+    error, resultJSON, retorno : TJSONObject;
+begin
+
+
+  error := TJSONObject.Create;
+  resultJSON := TJSONObject.Create;
+  retorno :=  TJSONObject.Create;
+
+
+  if erro = false then
+    retorno.AddPair('error', 'False')
+  else
+    retorno.AddPair('error', 'True');
+
+
+  resultJSON.AddPair(TJSONPair.Create('codigo', codigo.ToString));
+  resultJSON.AddPair(TJSONPair.Create('mensagem', mensagem));
+  if notaFiscalNumero<>'' then resultJSON.AddPair(TJSONPair.Create('notafiscalnumero', notaFiscalNumero));
+  if notaFiscalSerie<>'' then resultJSON.AddPair(TJSONPair.Create('notafiscalserie', notaFiscalSerie));
+  if chave<>'' then resultJSON.AddPair(TJSONPair.Create('chaveacesso', chave));
+  if idArquivo<>'' then resultJSON.AddPair(TJSONPair.Create('idarquivo', idArquivo));
+  if contaCorrente<>'' then resultJSON.AddPair(TJSONPair.Create('contacorrente', contacorrente));
+  if content<>'' then resultJSON.AddPair(TJSONPair.Create('content', content));
+  if JSONArrayToSend.Count>0 then resultJSON.AddPair(TJSONPair.Create('listaboleto', JSONArrayToSend));
+
+  retorno.AddPair('result', resultJSON);
+
+  result :=  retorno.ToString;
+
+end;
+
+
+end.

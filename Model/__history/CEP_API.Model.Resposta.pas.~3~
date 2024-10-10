@@ -1,0 +1,71 @@
+unit CEP_API.Model.Resposta;
+
+interface
+
+uses  System.SysUtils,
+      System.Classes,
+      System.JSON;
+
+
+type TCEP_Resposta = class
+  private
+    fCEP: String;
+    fAddressType: String;
+    fAddressName: String;
+    fAddress: String;
+    fDistrict: String;
+    fState: String;
+    fCity: String;
+    fLat: String;
+    fLng: String;
+    fDDD: String;
+    fCityIBGE: String;
+  public
+    property CEP: String read fCEP write fCEP;
+    property AddressType: String read fAddressType write fAddressType;
+    property AddressName: String read fAddressName write fAddressName;
+    property Address: String read fAddress write fAddress;
+    property District: String read fDistrict write fDistrict;
+    property State: String read fState write fState;
+    property City: String read fCity write fCity;
+    property Lat: String read fLat write fLat;
+    property Lng: String read fLng write fLng;
+    property DDD: String read fDDD write fDDD;
+    property CityIBGE: String read fCityIBGE write fCityIBGE;
+    constructor Create;
+    destructor Destroy; override;
+    function GetRetorno : String;
+  end;
+
+implementation
+
+{ TResposta }
+
+constructor TCEP_Resposta.Create;
+begin
+  fCEP := EmptyStr;
+  fAddressType := EmptyStr;
+  fAddressName := EmptyStr;
+  fAddress := EmptyStr;
+  fDistrict := EmptyStr;
+  fState := EmptyStr;
+  fCity := EmptyStr;
+  fLat := EmptyStr;
+  fLng := EmptyStr;
+  fDDD := EmptyStr;
+  fCityIBGE := EmptyStr;
+end;
+
+destructor TCEP_Resposta.Destroy;
+begin
+  Free;
+  inherited;
+end;
+
+function TCEP_Resposta.GetRetorno: String;
+begin
+
+end;
+
+
+end.
